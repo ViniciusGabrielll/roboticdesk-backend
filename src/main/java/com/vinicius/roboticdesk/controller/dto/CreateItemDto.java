@@ -1,4 +1,6 @@
 package com.vinicius.roboticdesk.controller.dto;
 
-public record CreateItemDto(String title, Integer priority) {
+import java.util.List;
+
+public record CreateItemDto(String title, Integer priority, List<Long> positionsId) {
 }

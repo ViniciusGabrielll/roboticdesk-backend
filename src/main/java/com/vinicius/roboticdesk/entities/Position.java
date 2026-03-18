@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.processing.Pattern;
 
 import java.util.List;
 
@@ -32,5 +33,7 @@ public class Position {
     @ManyToOne
     @JsonIgnore
     private Team team;
+
+    private String color;
 
 }

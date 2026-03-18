@@ -1,11 +1,9 @@
 package com.vinicius.roboticdesk.controller;
 
 import com.vinicius.roboticdesk.controller.dto.CreateItemDto;
-import com.vinicius.roboticdesk.entities.Item;
-import com.vinicius.roboticdesk.entities.ItemStatus;
-import com.vinicius.roboticdesk.entities.Team;
-import com.vinicius.roboticdesk.entities.User;
+import com.vinicius.roboticdesk.entities.*;
 import com.vinicius.roboticdesk.repository.ItemRepository;
+import com.vinicius.roboticdesk.repository.PositionRepository;
 import com.vinicius.roboticdesk.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -28,6 +26,8 @@ public class ItemController {
 
     private final UserRepository userRepository;
 
+    private final PositionRepository positionRepository;
+
     @Transactional
     @PostMapping
     public ResponseEntity<Void> createItem(@RequestBody CreateItemDto dto, @AuthenticationPrincipal Jwt
@@ -44,6 +44,17 @@ public class ItemController {
         item.setTeam(user.getTeam());
         item.setPriority(dto.priority());
         item.setStatus(ItemStatus.TODO);
+        List<Position> positions = positionRepository
+                .findAllByPositionIdInAndTeam(dto.positionsId(), user.getTeam());
+
+        if (positions.size() != dto.positionsId().size()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Uma ou mais positions não pertencem ao time ou não existem"
+            );
+        }
+
+        item.setPositions(positions);
         itemRepository.save(item);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

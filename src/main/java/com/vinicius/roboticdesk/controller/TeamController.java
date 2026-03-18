@@ -1,10 +1,7 @@
 package com.vinicius.roboticdesk.controller;
 
 import com.vinicius.roboticdesk.controller.dto.CreateTeamDto;
-import com.vinicius.roboticdesk.entities.Role;
-import com.vinicius.roboticdesk.entities.Team;
-import com.vinicius.roboticdesk.entities.TeamInvite;
-import com.vinicius.roboticdesk.entities.User;
+import com.vinicius.roboticdesk.entities.*;
 import com.vinicius.roboticdesk.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -30,7 +27,9 @@ public class TeamController {
 
     private final TeamRepository teamRepository;
 
-    private final RoleRepository roleRepository;
+    private final PositionRepository positionRepository;
+
+    private final SprintRepository sprintRepository;
 
     private final UserRepository userRepository;
 
@@ -99,8 +98,23 @@ public class TeamController {
             user.setTeam(null);
         }
 
+        for (Position position : team.getPositions()) {
+            for (User user : position.getUsers()) {
+                user.getPositions().remove(position);
+            }
+            position.getUsers().clear();
+        }
+
+        userRepository.saveAll(users);
+
+        positionRepository.deleteByTeamId(team.getId());
+
         itemRepository.deleteByTeam(team);
+
+        sprintRepository.deleteByTeam(team);
+
         teamInviteRepository.deleteByTeam(team);
+
         teamRepository.delete(team);
 
 
@@ -279,7 +293,7 @@ public class TeamController {
     }
 
     @Transactional
-    @PostMapping("/teams/{teamId}/")
+    @PostMapping("/leave")
     public ResponseEntity<Void> leaveTeam(
             @AuthenticationPrincipal Jwt jwt
     ) {
@@ -304,6 +318,7 @@ public class TeamController {
             );
         }
 
+        user.setPositions(null);
         user.setTeam(null);
 
         userRepository.save(user);
