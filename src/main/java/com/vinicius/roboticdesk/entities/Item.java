@@ -21,8 +21,8 @@ public class Item {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "priority")
-    private Integer priority;
+    @Enumerated(EnumType.STRING)
+    private ItemPriority priority;
 
     @Enumerated(EnumType.STRING)
     private ItemStatus status;

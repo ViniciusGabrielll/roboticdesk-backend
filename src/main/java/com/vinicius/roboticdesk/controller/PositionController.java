@@ -113,6 +113,10 @@ public class PositionController {
             u.getPositions().remove(position);
         }
 
+        for (Item i : position.getItems()) {
+            i.getPositions().remove(position);
+        }
+
         positionRepository.delete(position);
 
         return ResponseEntity.noContent().build();

@@ -119,4 +119,30 @@ public class ItemController {
 
         return ResponseEntity.ok().build();
     }
+
+    @Transactional
+    @DeleteMapping("/{itemId}")
+    public ResponseEntity<Void> deleteItem(@PathVariable Long itemId, @AuthenticationPrincipal Jwt
+            jwt) {
+
+        UUID userId = UUID.fromString(jwt.getSubject());
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.UNAUTHORIZED, "Usuário não encontrado"
+                ));
+
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Item não encontrado"
+                ));
+
+        if(!user.getTeam().getItems().contains(item)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Esse item não pertence ao seu time.");
+        }
+
+        itemRepository.delete(item);
+
+        return ResponseEntity.noContent().build();
+    }
 }
